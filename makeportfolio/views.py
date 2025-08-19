@@ -1,8 +1,12 @@
 from datetime import date, timedelta
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view , renderer_classes
 from rest_framework.response import Response
-from .utils import download_prices, evaluate_gpu_by_score
+from .utils import download_prices, evaluate_gpu_by_score , get_optimal_portfolio
 import os
+from rest_framework.renderers import JSONRenderer
+from .universe import NASDAQ100
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 @api_view(["POST"])
 def run_montecarlo(request):
@@ -26,19 +30,6 @@ def run_montecarlo(request):
 
     return Response(results)
 
-# 고정 혹은 환경변수/DB에서 받아도 됨
-NASDAQ100 = [
-    "NVDA","MSFT","AAPL","GOOG","GOOGL","AMZN","META","AVGO","TSLA","NFLX",
-    "COST","PLTR","ASML","AMD","TMUS","CSCO","AZN","LIN","PEP","INTU",
-    "SHOP","TXN","BKNG","ISRG","QCOM","PDD","AMGN","ADBE","APP","ARM",
-    "GILD","HON","MU","AMAT","LRCX","CMCSA","ADP","MELI","PANW","KLAC",
-    "ADI","SNPS","INTC","CRWD","DASH","MSTR","SBUX","VRTX","CEG","CDNS",
-    "CTAS","ORLY","MDLZ","TRI","ABNB","MAR","CSX","PYPL","MRVL","MNST",
-    "REGN","ADSK","FTNT","WDAY","AEP","AXON","NXPI","ROP","FAST","IDXX",
-    "PCAR","PAYX","ROST","KDP","CPRT","EXC","DDOG","TEAM","EA","TTWO",
-    "ZS","XEL","BKR","CCEP","FANG","CSGP","VRSK","CHTR","MCHP","CTSH",
-    "GEHC","KHC","ODFL","DXCM","WBD","TTD","LULU","CDW","ON","BIIB","GFS"
-]
 
 @api_view(["GET"])
 def top3_nasdaq100(request):
@@ -81,7 +72,35 @@ def nasdaq100_topk_preview(request):
         risk_profile=rp,
         n_weights=800,          # 프리뷰: 작게
         batch_combos=20_000,    # VRAM 맞춰 조절
-        max_combos=40_000,      # 조합 샘플 제한
         topn=1,                 # 프리뷰는 1개만
     )
     return Response({"k": k, "risk_profile": rp, "period": [start, end], "results": rows})
+  
+
+@api_view(["GET"])
+@renderer_classes([JSONRenderer])
+def nasdaq100_portfolio(request):
+    try:
+        k = int(request.GET.get("k", "3"))
+        risk = request.GET.get("risk_profile", "balanced").lower()
+        start = request.GET.get("start") or (date.today() - relativedelta(years=1)).strftime("%Y-%m-%d")
+        end   = request.GET.get("end") or date.today().strftime("%Y-%m-%d")
+        topn  = int(request.GET.get("topn", "1"))
+        if k < 2:
+            return HttpResponseBadRequest("k must be >= 2")
+
+        rows = get_optimal_portfolio(
+            k=k,
+            risk_profile=risk,
+            start=start,
+            end=end,
+            topn=topn
+        )
+        return Response({
+            "k": k,
+            "risk_profile": risk,
+            "period": [start, end],
+            "results": rows
+        })
+    except Exception as e:
+        return Response({"detail": str(e)}, status=500)

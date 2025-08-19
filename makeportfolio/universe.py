@@ -1,0 +1,14 @@
+
+# 고정 혹은 환경변수/DB에서 받아도 됨
+NASDAQ100 = [
+    "NVDA","MSFT","AAPL","GOOG","GOOGL","AMZN","META","AVGO","TSLA","NFLX",
+    "COST","PLTR","ASML","AMD","TMUS","CSCO","AZN","LIN","PEP","INTU",
+    "SHOP","TXN","BKNG","ISRG","QCOM","PDD","AMGN","ADBE","APP","ARM",
+    "GILD","HON","MU","AMAT","LRCX","CMCSA","ADP","MELI","PANW","KLAC",
+    "ADI","SNPS","INTC","CRWD","DASH","MSTR","SBUX","VRTX","CEG","CDNS",
+    "CTAS","ORLY","MDLZ","TRI","ABNB","MAR","CSX","PYPL","MRVL","MNST",
+    "REGN","ADSK","FTNT","WDAY","AEP","AXON","NXPI","ROP","FAST","IDXX",
+    "PCAR","PAYX","ROST","KDP","CPRT","EXC","DDOG","TEAM","EA","TTWO",
+    "ZS","XEL","BKR","CCEP","FANG","CSGP","VRSK","CHTR","MCHP","CTSH",
+    "GEHC","KHC","ODFL","DXCM","WBD","TTD","LULU","CDW","ON","BIIB","GFS"
+]

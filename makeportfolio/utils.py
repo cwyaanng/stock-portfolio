@@ -22,7 +22,8 @@ import yfinance as yf
 import torch
 from itertools import combinations
 from datetime import datetime, timedelta
-
+from .prices_db import load_prices_from_db
+from .universe import NASDAQ100
 
 __all__ = [
     "download_prices",
@@ -131,9 +132,8 @@ def evaluate_gpu_by_score(
     k: int = 3,
     risk_profile: str = "balanced",
     rf_annual: float = 0.015,
-    n_weights: int = 1000,
-    batch_combos: int = 50_000,
-    random_sample: bool = True,
+    n_weights: int = 100,
+    batch_combos: int = 100_00,
     topn: int = 5,
     seed: int = 42,
     device: Optional[str] = None,       # "cuda"|"cpu"|None
@@ -147,7 +147,6 @@ def evaluate_gpu_by_score(
     - risk_profile: "aggressive"|"balanced"|"conservative"
     - n_weights: 각 조합에서 샘플링할 가중치 수
     - batch_combos: 한 번에 평가할 조합 수(배치). VRAM에 맞게 조절
-    - max_combos: 전체 조합에서 평가할 최대 수(샘플링)
     """
 
     # ── 디바이스 결정
@@ -248,6 +247,37 @@ def evaluate_gpu_by_score(
         })
     return nice
 
+
+def get_optimal_portfolio(
+    k: int,
+    risk_profile: str = "balanced",
+    start: str = "2024-01-01",
+    end: str = "2025-01-01",
+    n_weights: int = 100,
+    batch_combos: int = 10_000,
+    topn: int = 5,
+) -> List[Dict[str, Any]]:
+    """
+    DB에서 가격 불러와 최적의 포트폴리오를 계산
+    """
+    # 1. DB에서 가격 불러오기
+    prices = load_prices_from_db(NASDAQ100, start, end)
+
+    if prices.empty:
+        raise RuntimeError("DB에서 불러온 가격 데이터가 없습니다. DB를 먼저 채우세요.")
+
+    # 2. GPU 최적화 실행
+    results = evaluate_gpu_by_score(
+        prices,
+        k=k,
+        risk_profile=risk_profile,
+        n_weights=n_weights,
+        batch_combos=batch_combos,
+        topn=topn,
+    )
+
+    # 3. 반환 (이미 JSON-friendly dict)
+    return results
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 서버 기동 후 1회 호출 추천(첫 요청 지연 방지)
