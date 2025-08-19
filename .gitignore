@@ -1,0 +1,30 @@
+Miniconda3-latest-Linux-x86_64.sh
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+*.env
+settings_local.py
+
+# Django
+db.sqlite3
+/media/
+/static/
+/staticfiles/
+
+# Virtualenv
+venv/
+.venv/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
