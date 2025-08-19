@@ -18,7 +18,13 @@ interface PortfolioData {
   color: string;
 }
 
-// Mock API 함수들
+/**
+ * generatePortfolioWeights
+ * Input: stocks (Stock[])
+ * Output: PortfolioData[]
+ * 
+ * 설명: 종목 배열을 입력받아 랜덤 가중치로 포트폴리오를 생성 (Mock)
+ */
 const generatePortfolioWeights = (stocks: Stock[]): PortfolioData[] => {
   // 실제로는 Django API로 요청을 보냄
   const colors = ['#FFB5BA', '#B5D4FF', '#B5FFB5', '#FFE4B5', '#E4B5FF', '#B5FFF0'];
@@ -34,6 +40,13 @@ const generatePortfolioWeights = (stocks: Stock[]): PortfolioData[] => {
   }));
 };
 
+/**
+ * getTodayRecommendation
+ * Input: 없음
+ * Output: PortfolioData[]
+ * 
+ * 설명: 오늘의 추천 포트폴리오를 고정된 더미 데이터로 반환
+ */
 const getTodayRecommendation = (): PortfolioData[] => {
   // 오늘의 추천 포트폴리오 (Mock 데이터)
   return [
@@ -52,6 +65,15 @@ export default function App() {
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [portfolioType, setPortfolioType] = useState<'custom' | 'recommendation'>('custom');
 
+  
+  /**
+   * handleGeneratePortfolio
+   * Input: selectedStocks (Stock[])
+   * Output: void (상태 업데이트)
+   * 
+   * 설명: 선택한 종목을 기반으로 포트폴리오를 생성하는 핸들러
+   *       - 실제로는 Django API 호출 예정
+   */
   const handleGeneratePortfolio = async (selectedStocks: Stock[]) => {
     setIsLoading(true);
     setPortfolioType('custom');
@@ -78,6 +100,13 @@ export default function App() {
     }
   };
 
+  /**
+   * handleTodayRecommendation
+   * Input: 없음
+   * Output: void (상태 업데이트)
+   * 
+   * 설명: 오늘의 추천 포트폴리오를 불러오는 핸들러
+   */
   const handleTodayRecommendation = async () => {
     setIsLoading(true);
     setPortfolioType('recommendation');
@@ -86,7 +115,12 @@ export default function App() {
       // Mock 지연시간
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      //API 요청으로 변경 
       const data = getTodayRecommendation();
+
+
+      //name,value 를 받아오고 color는 frontend에서 할당 
+
       setPortfolioData(data);
       setLastUpdated(new Date().toLocaleString('ko-KR'));
     } catch (error) {

@@ -169,7 +169,6 @@ def evaluate_mp(prices, rf_annual=0.015, n_weights=2000,
     else:
         combos = combos_all
 
-    # 배치 리스트: (조합배치, 배치별시드)
     batches = []
     for b_id, s in enumerate(range(0, len(combos), batch_combos)):
         batch = combos[s:s+batch_combos]
